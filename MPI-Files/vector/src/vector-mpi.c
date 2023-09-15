@@ -18,9 +18,9 @@ double seconds(){
 }
 
 int main (int argc, char *argv[]){
-	int num_proc; //num_processes
-	int id_proc; //current_proces
-    int n_loc, start_i, end_i;
+	int num_proc = 1; //num_processes
+	int id_proc = 0; //current_proces
+    int n_loc = 0, start_i = 0, end_i = 0;
     int N = 100000;
     float * A, * B, * C, * Aux1;
     float helper;
@@ -31,18 +31,20 @@ int main (int argc, char *argv[]){
 	MPI_Comm_rank(MPI_COMM_WORLD, &id_proc);
     // Your code goes here!
 
-    system("clear");
-    if( argc == 2 ) {
-    	printf("The argument supplied is %s\n", argv[1]);
-    	N = atoi(argv[1]);
-    } else if( argc > 2 ) {
-      printf("Too many arguments supplied.\n");
-    } else {
-		printf("One argument expected.\n");
+	if(id_proc == 0){
+        system("clear");
+        if( argc == 2 ) {
+            printf("The argument supplied is %s\n", argv[1]);
+            N = atoi(argv[1]);
+        } else if( argc > 2 ) {
+        printf("Too many arguments supplied.\n");
+        } else {
+            printf("One argument expected.\n");
+        }
+        n_loc = N/num_proc;
+        start_i = id_proc * n_loc;
+        end_i = start_i + n_loc;
     }
-    n_loc = N/num_proc;
-    start_i = id_proc * n_loc;
-    end_i = start_i + n_loc;
 
     A = (float*)malloc(sizeof(float) * N);
     B = (float*)malloc(sizeof(float) * N);
@@ -54,21 +56,24 @@ int main (int argc, char *argv[]){
     	A[i] = rand() % (5 * N + 1);
     	B[i] = rand() % (7 * N + 1);
     }
+	t1 = MPI_Wtime();
 
-	t1 = seconds();
-	/**
+	MPI_Barrier(MPI_COMM_WORLD);
+    /**
      * int MPI_Bcast(void* buffer,
               int count,
               MPI_Datatype datatype,
               int emitter_rank,
               MPI_Comm communicator);
     */
-	MPI_Barrier(MPI_COMM_WORLD);
-	MPI_Bcast(&helper, 1, MPI_FLOAT, 0, MPI_COMM_WORLD);
+    MPI_Bcast(&n_loc, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    MPI_Bcast(&start_i, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    MPI_Bcast(&end_i, 1, MPI_INT, 0, MPI_COMM_WORLD);
     //for(int i = 0; i < N; ++i){
     for(int i = start_i + 1 ; i <= end_i; i++) {
     	Aux1[i] = M_PI * (A[i] + B[i]);
     }
+	
 	/*
     * MPI_Reduce(const void* send_buffer,
                void* receive_buffer,
@@ -79,7 +84,7 @@ int main (int argc, char *argv[]){
                MPI_Comm communicator);
     */
 	//MPI_Reduce(&Aux1, &C, N, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
-    t2 = seconds();
+    t2 = MPI_Wtime();
 	if(id_proc == 0){
 	    fprintf(stdout, "\nTotal time: %.6g\n", (t2-t1));
 	}
