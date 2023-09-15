@@ -1,0 +1,3 @@
+/leonardo/home/userexternal/aorozco0/SMR3872-Colombia-Mine/MyFiles/Broadcast/build/CMakeFiles/rebuild_cache.dir
+/leonardo/home/userexternal/aorozco0/SMR3872-Colombia-Mine/MyFiles/Broadcast/build/CMakeFiles/mpi_bcast.dir
+/leonardo/home/userexternal/aorozco0/SMR3872-Colombia-Mine/MyFiles/Broadcast/build/CMakeFiles/edit_cache.dir
