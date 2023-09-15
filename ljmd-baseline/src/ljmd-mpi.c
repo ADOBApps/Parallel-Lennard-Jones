@@ -181,7 +181,7 @@ int main(int argc, char **argv){
     double t_start;
 
     // Initialises the MPI environment
-    MPI_Init(&argc, &argv);
+    MPI_Init(NULL, NULL);
     * sys.mpicomm =  MPI_COMM_WORLD;
     MPI_Comm_rank(MPI_COMM_WORLD, &sys.mpirank);
     MPI_Comm_size(MPI_COMM_WORLD, &sys.mpisize);
@@ -190,6 +190,7 @@ int main(int argc, char **argv){
 
     if (sys.mpirank == 0){
         printf("LJMD version %3.1f\n", LJMD_VERSION);
+    }
 
         /* read input file */
         if(get_a_line(stdin,line)) return 1;
@@ -213,7 +214,6 @@ int main(int argc, char **argv){
         sys.dt=atof(line);
         if(get_a_line(stdin,line)) return 1;
         nprint=atoi(line);
-    }
 
     /**
      * int MPI_Bcast(void* buffer,
