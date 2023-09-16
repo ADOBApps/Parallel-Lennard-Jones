@@ -7,6 +7,8 @@
 #include <math.h>
 #include <time.h>
 #include <sys/time.h>
+//OpenMP
+#include <omp.h>
 
 double seconds(){
 	struct timeval tmp;
@@ -19,6 +21,7 @@ double seconds(){
 int main (int argc, char *argv[]){
     // Your code goes here!
     int N = 100000;
+    int my_threads = 0;
     float * A;
     float * B; 
     float * C;
@@ -37,13 +40,22 @@ int main (int argc, char *argv[]){
     B = (float*)malloc(sizeof(float)*N);
     C = (float*)malloc(sizeof(float)*N);
 
+    #pragma omp parallel for
     for(int i = 0; i < N; ++i){
       A[i] = rand() % (5 * N + 1);
       B[i] = rand() % (7 * N + 1);
     }
 
+    #pragma omp parallel
+    {
+        my_threads = omp_get_max_threads();
+    }
+    
+    printf("%i", my_threads);
+    omp_set_num_threads(my_threads);
+
     t1 = seconds();
-    // #pragma omp target teams distribute num_teams(3)
+    #pragma omp parallel for
     for(int i = 0; i < N; ++i){
       C[i] = M_PI * (A[i] + B[i]);
     }

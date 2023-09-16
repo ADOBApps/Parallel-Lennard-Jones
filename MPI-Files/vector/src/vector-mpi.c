@@ -4,10 +4,11 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <mpi.h>
 #include <math.h>
 #include <time.h>
 #include <sys/time.h>
+
+#include <mpi.h>
 
 double seconds(){
 	struct timeval tmp;
@@ -32,7 +33,7 @@ int main (int argc, char *argv[]){
     // Your code goes here!
 
 	if(id_proc == 0){
-        system("clear");
+        //system("clear");
         if( argc == 2 ) {
             printf("The argument supplied is %s\n", argv[1]);
             N = atoi(argv[1]);
@@ -86,7 +87,7 @@ int main (int argc, char *argv[]){
 	//MPI_Reduce(&Aux1, &C, N, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
     t2 = MPI_Wtime();
 	if(id_proc == 0){
-	    fprintf(stdout, "\nTotal time: %.6g\n", (t2-t1));
+	    fprintf(stdout, "\nTotal parallel execution time: %.6g\n", (t2-t1));
 	}
     free(A);
     free(B);
