@@ -1,8 +1,8 @@
 #!/bin/bash
-    echo "";
-    echo "=============================================";
-    echo "Test for serial"
-    ./vector-serial.x 100000
+echo "";
+echo "=============================================";
+echo "Test for serial"
+./vector-serial.x 100000
 
 { # try
     echo "";

@@ -13,17 +13,35 @@
 
 # modulefiles to be loaded to have MPI on Leonardo
 # module load cineca-hpyc;
-    echo "";
-    echo "=============================================";
-    echo "Test for serial"
-    ./vector-serial.x 100000
+echo "";
+echo "=============================================";
+echo "Test for serial"
+./vector-serial.x 100000
 
 { # try
     echo "";
     echo "=============================================";
     echo "Test for MPI"
-    mpirun -np 4 ./vector-mpi.x 100000
+    mpirun -np 32 ./vector-mpi.x 100000
 } || { # catch
     echo "MPI no ready yet";
+}
+
+{ # try
+    echo "";
+    echo "=============================================";
+    echo "Test for OpenMP"
+    ./vector-omp.x 100000
+} || { # catch
+    echo "OpenMP no ready yet";
+}
+
+{ # try
+    echo "";
+    echo "=============================================";
+    echo "Test for Hybrid"
+    mpirun -np 32 ./vector-omp.x 100000
+} || { # catch
+    echo "Hybrid no ready yet";
 }
 
