@@ -12,9 +12,7 @@
 #include <math.h>
 #include <sys/time.h>
 
-#if defined(_OPENMP)
 #include <omp.h>
-#endif
 
 /* generic file- or pathname buffer length */
 #define BLEN 200
@@ -105,16 +103,16 @@ static void force(mdsys_t *sys){
 
     /* zero energy and forces */
     sys->epot=0.0;
+    epot=0.0;
     azzero(sys->fx, sys->natoms);
     azzero(sys->fy, sys->natoms);
     azzero(sys->fz, sys->natoms);
     c12 = 4.0 * sys->epsilon * pow(sys->sigma, 12.0); // new
     c6 = 4.0 * sys->epsilon * pow(sys->sigma, 6.0); // new
     rcsq = sys->rcut * sys->rcut; // new
-    #if defined(_OPENMP)
-    #pragma omp parallel for default (shared) \
-        private(i) reduction(+:epot)
-    #endif
+    /*#pragma omp parallel for default (shared) \
+        private(i, j) reduction(+:epot)*/
+    #pragma omp parallel for private(i, j)
     for(i = 0; i < (sys->natoms) - 1; ++i) {
         for(j = (i + 1); j < (sys->natoms); ++j) {
 
@@ -160,6 +158,7 @@ static void velverlet(mdsys_t *sys){
     force(sys);
 
     /* second part: propagate velocities by another half step */
+    #pragma omp parallel for private(i)
     for (i=0; i<sys->natoms; ++i) {
         sys->vx[i] += 0.5*sys->dt / mvsq2e * sys->fx[i] / sys->mass;
         sys->vy[i] += 0.5*sys->dt / mvsq2e * sys->fy[i] / sys->mass;
@@ -174,6 +173,7 @@ static void output(mdsys_t *sys, FILE *erg, FILE *traj){
     printf("% 8d % 20.8f % 20.8f % 20.8f % 20.8f\n", sys->nfi, sys->temp, sys->ekin, sys->epot, sys->ekin+sys->epot);
     fprintf(erg,"% 8d % 20.8f % 20.8f % 20.8f % 20.8f\n", sys->nfi, sys->temp, sys->ekin, sys->epot, sys->ekin+sys->epot);
     fprintf(traj,"%d\n nfi=%d etot=%20.8f\n", sys->natoms, sys->nfi, sys->ekin+sys->epot);
+    #pragma omp parallel for
     for (i=0; i<sys->natoms; ++i) {
         fprintf(traj, "Ar  %20.8f %20.8f %20.8f\n", sys->rx[i], sys->ry[i], sys->rz[i]);
     }
@@ -233,9 +233,11 @@ int main(int argc, char **argv){
     /* read restart */
     fp=fopen(restfile,"r");
     if(fp) {
+        #pragma omp parallel for
         for (i=0; i<sys.natoms; ++i) {
             fscanf(fp,"%lf%lf%lf",sys.rx+i, sys.ry+i, sys.rz+i);
         }
+        #pragma omp parallel for
         for (i=0; i<sys.natoms; ++i) {
             fscanf(fp,"%lf%lf%lf",sys.vx+i, sys.vy+i, sys.vz+i);
         }

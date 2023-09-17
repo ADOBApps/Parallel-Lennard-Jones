@@ -24,7 +24,6 @@ int main (int argc, char *argv[]){
     int n_loc = 0, start_i = 0, end_i = 0;
     int N = 100000;
     float * A, * B, * C, * Aux1;
-    float helper;
     double t1 = 0.0, t2 = 0.0;
 
 	MPI_Init(&argc, &argv);
@@ -70,11 +69,12 @@ int main (int argc, char *argv[]){
     MPI_Bcast(&n_loc, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&start_i, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&end_i, 1, MPI_INT, 0, MPI_COMM_WORLD);
-    //for(int i = 0; i < N; ++i){
-    for(int i = start_i + 1 ; i <= end_i; i++) {
+    for(int i = 0; i < N; ++i){
+    //for(int i = start_i + 1 ; i <= end_i; i++) {
     	Aux1[i] = M_PI * (A[i] + B[i]);
     }
-	
+    // Wait for task complete
+	MPI_Barrier(MPI_COMM_WORLD);
 	/*
     * MPI_Reduce(const void* send_buffer,
                void* receive_buffer,
@@ -84,7 +84,7 @@ int main (int argc, char *argv[]){
                int root,
                MPI_Comm communicator);
     */
-	//MPI_Reduce(&Aux1, &C, N, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
+	//MPI_Reduce(&Aux1, &C, (N), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
     t2 = MPI_Wtime();
 	if(id_proc == 0){
 	    fprintf(stdout, "\nTotal parallel execution time: %.6g\n", (t2-t1));
